@@ -2,21 +2,25 @@
 
 ## Структура проекта
 
-```
+```C++
 📦TcpClientUsr200
  ┗ 📦Client
  ┃   ┗📜tcpclient.cpp
- ┃   ┗📜tcpclient.h
+ ┃   ┗📜tcpclient.h //tcp клиент
  ┃
  ┗ 📦utils
- ┃    ┗ 📜hexspinbox.cpp
+ ┃    ┗ 📜hexspinbox.cpp //виджет hex QSpinBox
  ┃
- ┗ 📜mainwindow.cpp 
+ ┗ 📜mainwindow.h // отрисовка виджетов
  ┗ 📜mainwindow.cpp
  ┃
- ┗ 📜mainwindow.cpp
+ ┗ 📜main.cpp // основная ф-ия
  
- ┗ 
-
-
 ```
+
+### Запуск программы
+- Склонить проект
+- Открыть в Qt creator .pro файл
+- Скомпилировать проект
+
+### Интерфейс прогаммы
