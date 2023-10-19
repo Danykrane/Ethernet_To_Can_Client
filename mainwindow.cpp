@@ -48,13 +48,13 @@ MainWindow::MainWindow(QWidget* parent)
 
     //--------------------------------------------------------- отправка данных
 
-    QLabel *inputText = new QLabel("Введите данные для отправки");
+    QLabel *inputText = new QLabel("Can data frame");
 
     // Данные для ввода
 
     //    QLineEdit*   writeData    = new QLineEdit;
     QPushButton* sendBtn      = new QPushButton("send");
-    QLabel*      getDataText  = new QLabel("Полученные данные");
+    QLabel *getDataText = new QLabel("Recieved data");
     QTextEdit*   recievedData = new QTextEdit;
     QPushButton* clearFormBtn = new QPushButton("clear");
 
