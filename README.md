@@ -24,3 +24,4 @@
 - Скомпилировать проект
 
 ### Интерфейс прогаммы
+![image](https://github.com/Danykrane/Ethernet_To_Can_Client/blob/dev/doc/images/startMenu.png)
