@@ -15,7 +15,7 @@
  ┗ 📜mainwindow.cpp
  ┃
  ┗ 📜main.cpp // основная ф-ия
- 
+
 ```
 
 ### Запуск программы
@@ -24,4 +24,4 @@
 - Скомпилировать проект
 
 ### Интерфейс прогаммы
-![image](https://github.com/Danykrane/Ethernet_To_Can_Client/blob/dev/doc/images/startMenu.png)
+![image](doc/images/startMenu.png)
