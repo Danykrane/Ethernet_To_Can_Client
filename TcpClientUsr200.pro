@@ -11,16 +11,32 @@ CONFIG += c++17
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
-    Client/tcpclient.cpp \
-    main.cpp \
+    #libq cdevice
+    core/libq/cdevice.cpp\
+    # tcp client
+    client/tcpclient.cpp \
+    # sqpinBix hex widget
+    modules/basecan/basecdevicecan.cpp \
+    utils/hexspinbox.cpp \
+    # main widget
     mainwindow.cpp \
-    utils/hexspinbox.cpp
+    # main
+    main.cpp
 
 HEADERS += \
-    Client/tcpclient.h \
-    mainwindow.h
+    #libq cdevice
+    core/libq/cdevice.h\
+    client/tcpclient.h \
+    mainwindow.h \
+    modules/basecan/basecdevicecan.h
+
+
+INCLUDEPATH += $${PWD}/core/libq
+INCLUDEPATH += $${PWD}/core/client
+INCLUDEPATH += $${PWD}/modules/basecan
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
+

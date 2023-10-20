@@ -29,7 +29,7 @@ MainWindow::MainWindow(QWidget* parent)
     auto *gridConnection = new QGridLayout(new QWidget);
     auto *hostLabel = new QLabel("host name");
     auto *portLabel = new QLabel("port");
-    auto *hostInput = new QLineEdit("192.168.1.17");
+    auto *hostInput = new QLineEdit("192.168.10.17");
 
     auto *portInput = new QSpinBox;
     portInput->setRange(0, 65535);
