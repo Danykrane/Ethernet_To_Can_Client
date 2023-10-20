@@ -6,6 +6,7 @@
 #include <QLabel>
 #include <QPushButton>
 #include <QTextEdit>
+#include <QMessageBox>
 
 #include <QVBoxLayout>
 #include <QHBoxLayout>
@@ -97,6 +98,8 @@ MainWindow::MainWindow(QWidget* parent)
         gridInput->addWidget(dataSpinBx, 1, 2 + i);
     }
 
+    // ------------------------------------------------------ alert message box
+
     connect(lenSpinBx, &HexSpinBox::textChanged, [lenSpinBx, dataSpinBoxes] () {
         //        qDebug() << lenSpinBx->hexValue();
 
@@ -152,6 +155,10 @@ MainWindow::MainWindow(QWidget* parent)
             portInput->setEnabled(false);
             connectBtn->setVisible(false);
             disconnectBtn->setVisible(true);
+        }
+        else {
+            // предупреждение
+            QMessageBox::critical(this,"Message", "Wrong ip or port \nTry to ping", QMessageBox::Ok);
         }
     });
 

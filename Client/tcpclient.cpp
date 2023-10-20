@@ -26,7 +26,8 @@ QByteArray TcpClient::socketData()
 bool TcpClient::connectToServer(const QString& hostName, quint16 port)
 {
     socket->connectToHost(hostName, port);
-    return socket->waitForConnected();
+    int waitMsec = 2000;
+    return socket->waitForConnected(waitMsec);
 }
 
 void TcpClient::disconnectFromServer()
