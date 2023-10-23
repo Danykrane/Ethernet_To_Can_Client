@@ -23,7 +23,6 @@ public:
         setValue(i(value));
     }
 
-    void createConnections();
 
 protected:
     QString textFromValue (int value) const

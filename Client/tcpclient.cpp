@@ -23,10 +23,9 @@ QByteArray TcpClient::socketData()
     return (QTime::currentTime().toString() + " ").toUtf8() + socket->readAll();
 }
 
-bool TcpClient::connectToServer(const QString& hostName, quint16 port)
+bool TcpClient::connectToServer(const QString& hostName, uint16_t port, uint16_t waitMsec)
 {
     socket->connectToHost(hostName, port);
-    int waitMsec = 2000;
     return socket->waitForConnected(waitMsec);
 }
 

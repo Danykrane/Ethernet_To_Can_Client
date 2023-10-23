@@ -17,6 +17,8 @@ SOURCES += \
     client/tcpclient.cpp \
     # sqpinBix hex widget
     modules/basecan/basecdevicecan.cpp \
+    modules/basecan/cdeviceusrcanet200.cpp \
+    utils/functions.cpp \
     utils/hexspinbox.cpp \
     # main widget
     mainwindow.cpp \
@@ -28,7 +30,8 @@ HEADERS += \
     core/libq/cdevice.h\
     client/tcpclient.h \
     mainwindow.h \
-    modules/basecan/basecdevicecan.h
+    modules/basecan/basecdevicecan.h \
+    modules/basecan/cdeviceusrcanet200.h
 
 
 INCLUDEPATH += $${PWD}/core/libq

@@ -149,7 +149,7 @@ MainWindow::MainWindow(QWidget* parent)
     });
 
     connect(connectBtn, &QPushButton::clicked, [=]() {
-        bool state = client->connectToServer(hostInput->text(), portInput->text().toInt());
+        bool state = client->connectToServer(hostInput->text(), portInput->text().toInt(), 2000);
         if (state) {
             hostInput->setEnabled(false);
             portInput->setEnabled(false);
@@ -184,6 +184,8 @@ MainWindow::MainWindow(QWidget* parent)
                 data.prepend(static_cast<char>(dataSpinBoxes[i]->value()));
             }
         }
+
+
         //        qDebug() << data;
         frame.setPayload(data);
         qDebug() << frame.toString();
@@ -196,6 +198,15 @@ MainWindow::MainWindow(QWidget* parent)
         //        }
 
         //         85 12 34 56 78 12 34 56 78 00 00 00 00
+
+
+        qDebug() << frame.payload().size();
+
+
+        QByteArray resData;
+        resData.resize(13);
+        uint16_t payloadSize = frame.payload().size() & 0xFF;
+        resData[0] = payloadSize;
 
         // QByteArray data = QByteArray("\x81\x12"
         //                                     "4Vx\x01\x02\x03\x04\x05\x06\x07\x08");
