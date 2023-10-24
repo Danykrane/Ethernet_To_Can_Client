@@ -13,7 +13,7 @@ public:
     QByteArray socketData();
 
 public slots:
-    bool connectToServer(const QString& hostName, quint16 port);
+    bool connectToServer(const QString& hostName, uint16_t port, uint16_t waitMsec);
     void disconnectFromServer();
     void sendData(const QByteArray& data);
 
@@ -23,7 +23,7 @@ signals:
     void dataReceived(const QByteArray& data);
 
 public slots:
-    void readData();
+    void read();
 
 private:
     QTcpSocket* socket;

@@ -15,7 +15,7 @@ TcpClient::TcpClient(QObject* parent)
             this,
             &TcpClient::disconnectedFromServer);
 
-    connect(socket, &QTcpSocket::readyRead, this, &TcpClient::readData);
+    connect(socket, &QTcpSocket::readyRead, this, &TcpClient::read);
 }
 
 QByteArray TcpClient::socketData()
@@ -23,10 +23,9 @@ QByteArray TcpClient::socketData()
     return (QTime::currentTime().toString() + " ").toUtf8() + socket->readAll();
 }
 
-bool TcpClient::connectToServer(const QString& hostName, quint16 port)
+bool TcpClient::connectToServer(const QString& hostName, uint16_t port, uint16_t waitMsec)
 {
     socket->connectToHost(hostName, port);
-    int waitMsec = 2000;
     return socket->waitForConnected(waitMsec);
 }
 
@@ -49,7 +48,7 @@ void TcpClient::sendData(const QByteArray& data)
     }
 }
 
-void TcpClient::readData()
+void TcpClient::read()
 {
     QByteArray data = socket->readAll();
     emit       dataReceived(data);
