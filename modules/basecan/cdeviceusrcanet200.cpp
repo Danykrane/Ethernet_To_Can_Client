@@ -4,6 +4,7 @@
 
 #include <QRegularExpression>
 #include <QVector>
+#include <QThread>
 
 
 /* ---------------------------- CdeviceUsrCanet200Private ---------------- */
@@ -115,6 +116,7 @@ void CdeviceUsrCanet200Private::createConnections()
 /* ------------------------------ CdeviceUsrCanet200 ----------------------- */
 CdeviceUsrCanet200::CdeviceUsrCanet200(const std::string &addr):
     BaseCdeviceCan(addr),
+    m_thread(new QThread),
     d_ptr(new CdeviceUsrCanet200Private(this))
 {
     Q_D(CdeviceUsrCanet200);

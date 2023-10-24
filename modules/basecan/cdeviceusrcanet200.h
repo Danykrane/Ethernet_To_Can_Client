@@ -4,6 +4,7 @@
 #include "basecdevicecan.h"
 #include "qobjectdefs.h"
 
+class QThread;
 class CdeviceUsrCanet200Private;
 /*!
  * \brief Класс устройства USR-Canet200
@@ -89,6 +90,7 @@ public:
 
 private:
     Q_DECLARE_PRIVATE(CdeviceUsrCanet200);
+    std::unique_ptr<QThread> m_thread;
     std::unique_ptr<CdeviceUsrCanet200Private> d_ptr;
 };
 
