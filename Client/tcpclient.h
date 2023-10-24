@@ -10,20 +10,18 @@ class TcpClient : public QObject
 public:
     explicit TcpClient(QObject* parent = nullptr);
 
-    QByteArray socketData();
-
-public slots:
+public:
     bool connectToServer(const QString& hostName, uint16_t port, uint16_t waitMsec);
     void disconnectFromServer();
-    void sendData(const QByteArray& data);
+    bool sendData(const QByteArray& data);
+
+public slots:
+    void read();
 
 signals:
     void connectedToServer();
     void disconnectedFromServer();
     void dataReceived(const QByteArray& data);
-
-public slots:
-    void read();
 
 private:
     QTcpSocket* socket;

@@ -16,6 +16,20 @@ public:
      */
     explicit BaseCdeviceCan(const std::string& addr);
 
+    /*!
+     * \brief read - чтение в dataframe
+     * \param dataFrame - дата формата QCanBus
+     * \return
+     */
+    virtual int read(QByteArray& dataFrame) = 0;
+
+    /*!
+     * \brief write - запись dataframe
+     * \param dataFrame - дата формата QCanBus
+     * \return
+     */
+    virtual int write(const QCanBusFrame& dataFrame) = 0;
+
 protected:
     /*!
     * \brief Пользовательская реализация метода установки соединения
@@ -33,19 +47,6 @@ protected:
      */
     virtual bool isConnected() = 0;
 
-    /*!
-     * \brief read - чтение dataframe
-     * \param dataFrame - дата формата QCanBus
-     * \return
-     */
-    virtual int read(QCanBusFrame& dataFrame) = 0;
-
-    /*!
-     * \brief write - запись dataframe
-     * \param dataFrame - дата формата QCanBus
-     * \return
-     */
-    virtual int write(const QCanBusFrame& dataFrame) = 0;
 
 private:
     Q_DISABLE_COPY_MOVE(BaseCdeviceCan);

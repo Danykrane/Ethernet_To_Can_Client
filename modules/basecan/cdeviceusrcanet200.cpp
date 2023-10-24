@@ -1,14 +1,16 @@
 #include "cdeviceusrcanet200.h"
 #include "client/tcpclient.h"
+#include "utils/functions.cpp"
 
 #include <QRegularExpression>
+#include <QVector>
 
 
 /* ---------------------------- CdeviceUsrCanet200Private ---------------- */
 class CdeviceUsrCanet200Private
 {
 public:
-    CdeviceUsrCanet200Private();
+    CdeviceUsrCanet200Private(CdeviceUsrCanet200 *parent);
 public:
     // tcp клиент
     TcpClient *client;
@@ -23,8 +25,11 @@ public:
     // статус соединения
     bool connectionStatus = false;
 
+    // время ожидания соединения
     uint16_t waitMsec = 500;
 
+    // текущие данные
+    QByteArray currentSocketData;
 public:
     /*!
      * \brief connectToHost - создать соединение из записанных данных
@@ -38,13 +43,26 @@ public:
      */
     void disconnectDevice();
 
+    /*!
+     * \brief parseAdress - Парсинг адреса на ip и порт
+     * \param adress - строка Ip:port
+     */
     void parseAdress(const std::string& adress);
+
+    /*!
+     * \brief Создание коннектов
+     */
+    void createConnections();
+
+public:
+    Q_DECLARE_PUBLIC(CdeviceUsrCanet200);
+    CdeviceUsrCanet200 *q_ptr;
 };
 
-CdeviceUsrCanet200Private::CdeviceUsrCanet200Private():
-    client(new TcpClient)
+CdeviceUsrCanet200Private::CdeviceUsrCanet200Private(CdeviceUsrCanet200 *parent):
+    client(new TcpClient), q_ptr(parent)
 {
-
+    createConnections();
 }
 
 bool CdeviceUsrCanet200Private::connectToHost(uint16_t waitMsec)
@@ -70,40 +88,60 @@ void CdeviceUsrCanet200Private::parseAdress(const std::string &adress)
     }
 
     if(portMatch.hasMatch()){
-        port = portMatch.captured(0).toInt();
+        port = portMatch.captured(1).toInt();
     }
 
 }
 
+void CdeviceUsrCanet200Private::createConnections()
+{
+//    Q_Q(CdeviceUsrCanet200);
+    QAbstractEventDispatcher::connect(client, &TcpClient::connectedToServer, [] () {
+        qDebug() << "Connected to server";
+    });
 
-///* ------------------------------ CdeviceUsrCanet200 --------------------- */
+    QAbstractEventDispatcher::connect(client, &TcpClient::disconnectedFromServer, [] () {
+        qDebug() << "Disconnected from server";
+    });
+
+    QAbstractEventDispatcher::connect(client, &TcpClient::dataReceived,[=](const QByteArray &data){
+        qDebug() <<data<<"=========";
+        currentSocketData = data;
+//        emit q->sendedFromSocketData();
+    });
+}
+
+
+/* ------------------------------ CdeviceUsrCanet200 ----------------------- */
 CdeviceUsrCanet200::CdeviceUsrCanet200(const std::string &addr):
     BaseCdeviceCan(addr),
-    d_ptr(new CdeviceUsrCanet200Private)
+    d_ptr(new CdeviceUsrCanet200Private(this))
 {
     Q_D(CdeviceUsrCanet200);
     d->parseAdress(addr);
 }
 
-int CdeviceUsrCanet200::read(QCanBusFrame &dataFrame)
+int CdeviceUsrCanet200::read(QByteArray &dataFrame)
 {
+    Q_D(CdeviceUsrCanet200);
+    dataFrame = d->currentSocketData;
     return CDevice::SUCCESS;
-
 }
 
 int CdeviceUsrCanet200::write(const QCanBusFrame &dataFrame)
 {
     //TODO[new]:: исправить, чтобы запускалось в отдельном потоке
     Q_D(CdeviceUsrCanet200);
-//    QByteArray currData = parseCanFrame(dataFrame);
-//    d->client->sendData(currData);
+    if (d->client->sendData(parseCanFrame(dataFrame))){
+        return CDevice::SUCCESS;
 
-    return CDevice::SUCCESS;
+    }
+    return CDevice::error;
+
 }
 
 int CdeviceUsrCanet200::onInit()
 {
-    //TODO[new]:: исправить, чтобы запускалось в отдельном потоке
     Q_D(CdeviceUsrCanet200);
     d->connectionStatus = d->connectToHost(d->waitMsec);
     if(d->connectionStatus){
@@ -114,7 +152,6 @@ int CdeviceUsrCanet200::onInit()
 
 int CdeviceUsrCanet200::onClose()
 {
-    //TODO[new]:: исправить, чтобы закрывалось из другого потока
     Q_D(CdeviceUsrCanet200);
     d->connectionStatus = false;
     d->disconnectDevice();
