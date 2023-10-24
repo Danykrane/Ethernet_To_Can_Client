@@ -4,8 +4,6 @@
 #include "cdevice.h"
 
 class QCanBusFrame;
-
-class BaseCdeviceCanPrivate;
 /*!
  * \brief Абстрактный класс устройств работающих по Can
  */
@@ -22,12 +20,12 @@ protected:
     /*!
     * \brief Пользовательская реализация метода установки соединения
    */
-    virtual int onInit() override;
+    virtual int onInit() = 0;
 
     /*!
      * \brief Пользовательская реализация метода закрытия соединения
      */
-    virtual int onClose() override;
+    virtual int onClose() = 0;
 
     /*!
      * \brief True - если соединение установлено
@@ -36,14 +34,14 @@ protected:
     virtual bool isConnected() = 0;
 
     /*!
-     * \brief readData - чтение dataframe
+     * \brief read - чтение dataframe
      * \param dataFrame - дата формата QCanBus
      * \return
      */
-    virtual int read(const QCanBusFrame& dataFrame) = 0;
+    virtual int read(QCanBusFrame& dataFrame) = 0;
 
     /*!
-     * \brief writeData - запись dataframe
+     * \brief write - запись dataframe
      * \param dataFrame - дата формата QCanBus
      * \return
      */

@@ -1,6 +1,7 @@
 #include "mainwindow.h"
 #include "Client/tcpclient.h"
 #include "utils/hexspinbox.cpp"
+#include "utils/functions.cpp"
 
 #include <QLineEdit>
 #include <QLabel>
@@ -53,7 +54,7 @@ MainWindow::MainWindow(QWidget* parent)
 
     // Данные для ввода
 
-    //    QLineEdit*   writeData    = new QLineEdit;
+    //    QLineEdit*   write    = new QLineEdit;
     QPushButton* sendBtn      = new QPushButton("send");
     QLabel *getDataText = new QLabel("Recieved data");
     QTextEdit*   recievedData = new QTextEdit;
@@ -173,8 +174,6 @@ MainWindow::MainWindow(QWidget* parent)
 
     //----------------------------------------------------- Коннект к хосту
 
-    //    client->connectToServer("192.168.0.7", 20001);
-
     connect(sendBtn, &QPushButton::clicked, [=]() {
         QCanBusFrame frame;
         frame.setFrameId(canIdSpinBx->value());
@@ -184,47 +183,17 @@ MainWindow::MainWindow(QWidget* parent)
                 data.prepend(static_cast<char>(dataSpinBoxes[i]->value()));
             }
         }
-
-
-        //        qDebug() << data;
         frame.setPayload(data);
-        qDebug() << frame.toString();
-        //        QString currDataText = writeData->text();
-        //        writeData->clear();
-        //        if (!currDataText.isEmpty())
-        //        {
-        //            QByteArray sendData = currDataText.toUtf8();
-        //            client->sendData(sendData);
-        //        }
+        QByteArray arr = parseCanFrame(frame);
 
-        //         85 12 34 56 78 12 34 56 78 00 00 00 00
-
-
-        qDebug() << frame.payload().size();
-
-
-        QByteArray resData;
-        resData.resize(13);
-        uint16_t payloadSize = frame.payload().size() & 0xFF;
-        resData[0] = payloadSize;
-
-        // QByteArray data = QByteArray("\x81\x12"
-        //                                     "4Vx\x01\x02\x03\x04\x05\x06\x07\x08");
-
-        // client->sendData(data);
+        client->sendData(arr);
     });
 
     connect(clearFormBtn, &QPushButton::clicked, [=]() { recievedData->clear(); });
 
-    //    connect(recieveDataBtn, )
-    //    \201\0224Vx\001\002\003\004\005
-    //    \205\0224Vx\001\002\003\004\005\000\000\000\205\0224Vx\001\002\003\004\005\000\000\000\205\0224Vx\001\002\003\004\005\000\000\000\205\0224Vx\001\002\003\004\005\000\000\000\205\0224Vx\001\002\003\004\005\000\000\000\205\0224Vx\001\002\003\004\005\000\000\000
-
-    //=========================================================================
 
     setCentralWidget(vertLayer->parentWidget());
 
-    // очищаем начальный экран дисплея
     //    clearFormBtn->click();
 }
 

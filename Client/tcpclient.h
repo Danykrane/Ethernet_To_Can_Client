@@ -23,7 +23,7 @@ signals:
     void dataReceived(const QByteArray& data);
 
 public slots:
-    void readData();
+    void read();
 
 private:
     QTcpSocket* socket;

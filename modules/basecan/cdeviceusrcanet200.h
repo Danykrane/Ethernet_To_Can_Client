@@ -18,29 +18,29 @@ public:
     explicit CdeviceUsrCanet200(const std::string& addr);
 
     /*!
-     * \brief readData - реализация чтения данных
+     * \brief read - реализация чтения данных
      * \param dataFrame - данные
      * \return
      */
-    int readData(const QCanBusFrame& dataFrame) override;
+    int read(QCanBusFrame& dataFrame) override;
 
     /*!
-     * \brief writeData - реализация записи данных
+     * \brief write - реализация записи данных
      * \param dataFrame - данные
      * \return
      */
-    int writeData(const QCanBusFrame& dataFrame) override;
+    int write(const QCanBusFrame& dataFrame) override;
 
     /*!
      * \brief connect - создать соединение
      * \return true - соединение разорвано успешно, false - проблема
      */
-    bool connect() override;
+    int onInit() override;
     /*!
      * \brief disconnect - разорвать соединение
      * \return true - соединение разорвано успешно, false - проблема
      */
-    void disconnect() override;
+    int onClose() override;
 
     /*!
      * \brief isConnected - текущий статус соединений

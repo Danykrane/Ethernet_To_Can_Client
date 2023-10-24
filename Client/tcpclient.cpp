@@ -15,7 +15,7 @@ TcpClient::TcpClient(QObject* parent)
             this,
             &TcpClient::disconnectedFromServer);
 
-    connect(socket, &QTcpSocket::readyRead, this, &TcpClient::readData);
+    connect(socket, &QTcpSocket::readyRead, this, &TcpClient::read);
 }
 
 QByteArray TcpClient::socketData()
@@ -48,7 +48,7 @@ void TcpClient::sendData(const QByteArray& data)
     }
 }
 
-void TcpClient::readData()
+void TcpClient::read()
 {
     QByteArray data = socket->readAll();
     emit       dataReceived(data);

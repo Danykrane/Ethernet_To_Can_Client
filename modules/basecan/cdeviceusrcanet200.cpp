@@ -85,13 +85,13 @@ CdeviceUsrCanet200::CdeviceUsrCanet200(const std::string &addr):
     d->parseAdress(addr);
 }
 
-int CdeviceUsrCanet200::readData(const QCanBusFrame &dataFrame)
+int CdeviceUsrCanet200::read(QCanBusFrame &dataFrame)
 {
     return CDevice::SUCCESS;
 
 }
 
-int CdeviceUsrCanet200::writeData(const QCanBusFrame &dataFrame)
+int CdeviceUsrCanet200::write(const QCanBusFrame &dataFrame)
 {
     //TODO[new]:: исправить, чтобы запускалось в отдельном потоке
     Q_D(CdeviceUsrCanet200);
@@ -101,20 +101,24 @@ int CdeviceUsrCanet200::writeData(const QCanBusFrame &dataFrame)
     return CDevice::SUCCESS;
 }
 
-bool CdeviceUsrCanet200::connect()
+int CdeviceUsrCanet200::onInit()
 {
     //TODO[new]:: исправить, чтобы запускалось в отдельном потоке
     Q_D(CdeviceUsrCanet200);
     d->connectionStatus = d->connectToHost(d->waitMsec);
-    return d->connectionStatus;
+    if(d->connectionStatus){
+        return CDevice::SUCCESS;
+    }
+    return CDevice::error;
 }
 
-void CdeviceUsrCanet200::disconnect()
+int CdeviceUsrCanet200::onClose()
 {
     //TODO[new]:: исправить, чтобы закрывалось из другого потока
     Q_D(CdeviceUsrCanet200);
     d->connectionStatus = false;
     d->disconnectDevice();
+    return CDevice::SUCCESS;
 }
 
 bool CdeviceUsrCanet200::isConnected()
