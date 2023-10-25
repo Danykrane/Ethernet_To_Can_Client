@@ -1,7 +1,7 @@
 #include "mainwindow.h"
-#include "Client/tcpclient.h"
 #include "utils/hexspinbox.cpp"
-#include "utils/functions.cpp"
+
+#include "cdeviceusrcanet200.h"
 
 #include <QLineEdit>
 #include <QLabel>
@@ -19,6 +19,7 @@
 #include <QFontMetrics>
 
 #include <QCanBusFrame>
+#include <QTimer>
 
 MainWindow::MainWindow(QWidget* parent)
     : QMainWindow(parent)
@@ -131,27 +132,36 @@ MainWindow::MainWindow(QWidget* parent)
 
     vertLayer->addWidget(horLayer->parentWidget());
 
-    //================================================================== Клиент
+    //---------------------------------------------------- Создание устройства
 
-    TcpClient* client = new TcpClient;
+    BaseCdeviceCan *usrCanet200 = new CdeviceUsrCanet200("192.168.10.17:20001");
+    usrCanet200->init();
 
-    connect(client, &TcpClient::connectedToServer, [] () {
-        qDebug() << "Connected to server";
-    });
+    // начальное состояние (подключенное)
+    hostInput->setEnabled(false);
+    portInput->setEnabled(false);
+    connectBtn->setVisible(false);
+    disconnectBtn->setVisible(true);
 
-    connect(client, &TcpClient::disconnectedFromServer, [] () {
-        qDebug() << "Disconnected from server";
-    });
 
-    connect(client, &TcpClient::dataReceived, [=](const QByteArray &data) {
-        qDebug() << "Received data:" << data;
+//    connect(client, &TcpClient::dataReceived, [=](const QByteArray &data) {
+////        qDebug() << "Received data:" << data;
 
-        recievedData->append(data.toHex('/'));
-    });
+////        recievedData->append(data.toHex('/'));
+//        QByteArray currentData;
+//        usrCanet200->read(currentData);
+//        recievedData->append()
+//    });
 
+//    connect(usrCanet200, &CdeviceUsrCanet200::sendedFromSocketData, [=](){
+//                QByteArray currentData;
+//                usrCanet200->read(currentData);
+//                recievedData->append(currentData.toHex('/'));
+//    });
+
+    //--------------------------------------------------- Подключение к прибору
     connect(connectBtn, &QPushButton::clicked, [=]() {
-        bool state = client->connectToServer(hostInput->text(), portInput->text().toInt(), 2000);
-        if (state) {
+        if (usrCanet200->init() != CDevice::error) {
             hostInput->setEnabled(false);
             portInput->setEnabled(false);
             connectBtn->setVisible(false);
@@ -162,9 +172,9 @@ MainWindow::MainWindow(QWidget* parent)
             QMessageBox::critical(this,"Message", "Wrong ip or port \nTry to ping", QMessageBox::Ok);
         }
     });
-
+    //--------------------------------------------------- Отключение от прибора
     connect(disconnectBtn, &QPushButton::clicked, [=]() {
-        client->disconnectFromServer();
+        usrCanet200->close();
 
         hostInput->setEnabled(true);
         portInput->setEnabled(true);
@@ -172,7 +182,7 @@ MainWindow::MainWindow(QWidget* parent)
         disconnectBtn->setVisible(false);
     });
 
-    //----------------------------------------------------- Коннект к хосту
+    //--------------------------------------------------- Отправление сообщения
 
     connect(sendBtn, &QPushButton::clicked, [=]() {
         QCanBusFrame frame;
@@ -184,17 +194,12 @@ MainWindow::MainWindow(QWidget* parent)
             }
         }
         frame.setPayload(data);
-        QByteArray arr = parseCanFrame(frame);
 
-        client->sendData(arr);
+        usrCanet200->write(frame);
     });
 
     connect(clearFormBtn, &QPushButton::clicked, [=]() { recievedData->clear(); });
-
-
     setCentralWidget(vertLayer->parentWidget());
-
-    //    clearFormBtn->click();
 }
 
 MainWindow::~MainWindow()

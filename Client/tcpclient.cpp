@@ -18,10 +18,6 @@ TcpClient::TcpClient(QObject* parent)
     connect(socket, &QTcpSocket::readyRead, this, &TcpClient::read);
 }
 
-QByteArray TcpClient::socketData()
-{
-    return (QTime::currentTime().toString() + " ").toUtf8() + socket->readAll();
-}
 
 bool TcpClient::connectToServer(const QString& hostName, uint16_t port, uint16_t waitMsec)
 {
@@ -34,18 +30,12 @@ void TcpClient::disconnectFromServer()
     socket->disconnectFromHost();
 }
 
-void TcpClient::sendData(const QByteArray& data)
+bool TcpClient::sendData(const QByteArray& data)
 {
     socket->write(data);
-    bool writeFlag = socket->waitForBytesWritten();
-    if (writeFlag)
-    {
-        qDebug() << "socket written: " << data;
-    }
-    else
-    {
-        qDebug() << "probleb with write";
-    }
+    socket->flush();
+    return socket->waitForBytesWritten();
+
 }
 
 void TcpClient::read()

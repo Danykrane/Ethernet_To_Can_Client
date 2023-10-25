@@ -2,7 +2,9 @@
 #define CDEVICEUSRCANET200_H
 
 #include "basecdevicecan.h"
+#include "qobjectdefs.h"
 
+class QThread;
 class CdeviceUsrCanet200Private;
 /*!
  * \brief Класс устройства USR-Canet200
@@ -22,7 +24,7 @@ public:
      * \param dataFrame - данные
      * \return
      */
-    int read(QCanBusFrame& dataFrame) override;
+    int read(QByteArray& dataFrame) override;
 
     /*!
      * \brief write - реализация записи данных
@@ -32,12 +34,12 @@ public:
     int write(const QCanBusFrame& dataFrame) override;
 
     /*!
-     * \brief connect - создать соединение
+     * \brief onInit - создать соединение
      * \return true - соединение разорвано успешно, false - проблема
      */
     int onInit() override;
     /*!
-     * \brief disconnect - разорвать соединение
+     * \brief onClose - разорвать соединение
      * \return true - соединение разорвано успешно, false - проблема
      */
     int onClose() override;
@@ -83,6 +85,8 @@ public:
      */
     [[nodiscard]] const uint16_t waitMsec();
 
+//signals:
+//    void sendedFromSocketData();
 
 private:
     Q_DECLARE_PRIVATE(CdeviceUsrCanet200);
