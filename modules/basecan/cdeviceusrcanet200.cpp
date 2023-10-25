@@ -11,7 +11,8 @@
 class CdeviceUsrCanet200Private
 {
 public:
-    CdeviceUsrCanet200Private(CdeviceUsrCanet200 *parent);
+    explicit CdeviceUsrCanet200Private(CdeviceUsrCanet200 *parent);
+    ~CdeviceUsrCanet200Private();
 public:
     // tcp клиент
     TcpClient *client;
@@ -31,6 +32,9 @@ public:
 
     // текущие данные
     QByteArray currentSocketData;
+
+    // поток для сокета
+    std::unique_ptr<QThread> m_thread;
 public:
     /*!
      * \brief connectToHost - создать соединение из записанных данных
@@ -61,9 +65,32 @@ public:
 };
 
 CdeviceUsrCanet200Private::CdeviceUsrCanet200Private(CdeviceUsrCanet200 *parent):
-    client(new TcpClient), q_ptr(parent)
+    client(new TcpClient),
+    m_thread(new QThread),
+    q_ptr(parent)
 {
     createConnections();
+    // запускаем поток
+    m_thread->start();
+    // перемещаем объект в поток
+    client->moveToThread(m_thread.get());
+
+    /*
+    // Ошибка:
+    QObject: Cannot create children for a parent that is in a different thread.
+    (Parent is QTcpSocket(0x4c4aea0), parent's thread is QThread(0x4c4b1b0),
+    current thread is QThread(0x93c330)
+    */
+
+    //[NOTE]:: Завершаем и удаляем поток в деструкторе CdeviceUsrCanet200Private?
+
+}
+
+CdeviceUsrCanet200Private::~CdeviceUsrCanet200Private()
+{
+    m_thread->quit();
+    m_thread->wait();
+    m_thread->deleteLater();
 }
 
 bool CdeviceUsrCanet200Private::connectToHost(uint16_t waitMsec)
@@ -110,13 +137,17 @@ void CdeviceUsrCanet200Private::createConnections()
         currentSocketData = data;
 //        emit q->sendedFromSocketData();
     });
+
+    //QObject::connect(client, &TcpClient::connectedToServer,client,&TcpClient::read);
+
+
+
 }
 
 
 /* ------------------------------ CdeviceUsrCanet200 ----------------------- */
 CdeviceUsrCanet200::CdeviceUsrCanet200(const std::string &addr):
     BaseCdeviceCan(addr),
-    m_thread(new QThread),
     d_ptr(new CdeviceUsrCanet200Private(this))
 {
     Q_D(CdeviceUsrCanet200);
