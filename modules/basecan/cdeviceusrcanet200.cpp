@@ -97,15 +97,15 @@ void CdeviceUsrCanet200Private::parseAdress(const std::string &adress)
 void CdeviceUsrCanet200Private::createConnections()
 {
 //    Q_Q(CdeviceUsrCanet200);
-    QAbstractEventDispatcher::connect(client, &TcpClient::connectedToServer, [] () {
+    QObject::connect(client, &TcpClient::connectedToServer, [] () {
         qDebug() << "Connected to server";
     });
 
-    QAbstractEventDispatcher::connect(client, &TcpClient::disconnectedFromServer, [] () {
+    QObject::connect(client, &TcpClient::disconnectedFromServer, [] () {
         qDebug() << "Disconnected from server";
     });
 
-    QAbstractEventDispatcher::connect(client, &TcpClient::dataReceived,[=](const QByteArray &data){
+    QObject::connect(client, &TcpClient::dataReceived,[=](const QByteArray &data){
         qDebug() <<data<<"=========";
         currentSocketData = data;
 //        emit q->sendedFromSocketData();

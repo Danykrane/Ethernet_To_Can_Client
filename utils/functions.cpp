@@ -7,7 +7,7 @@ const uint8_t canIdByteSize = 4;
 const uint8_t startPayloadPosion = 5;
 
 /*!
- * \brief parseCanFrame - парсинг CanBusFrame в QByteArray
+ * \brief parseCanFrame - convert CanBusFrame в QByteArray
  * \param canFrame - кадр формата Can
  * \return данные в QByteArray
  */

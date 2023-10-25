@@ -33,6 +33,7 @@ void TcpClient::disconnectFromServer()
 bool TcpClient::sendData(const QByteArray& data)
 {
     socket->write(data);
+    socket->flush();
     return socket->waitForBytesWritten();
 
 }
