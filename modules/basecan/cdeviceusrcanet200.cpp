@@ -5,6 +5,12 @@
 #include <QRegularExpression>
 #include <QVector>
 #include <QThread>
+//#include <QEventLoop>
+//#include <QEvent>
+
+// для взаимодействия со слотами в другом event loop
+#include <QMetaObject>
+#include <QAbstractEventDispatcher>
 
 
 /* ---------------------------- CdeviceUsrCanet200Private ---------------- */
@@ -65,21 +71,25 @@ public:
 };
 
 CdeviceUsrCanet200Private::CdeviceUsrCanet200Private(CdeviceUsrCanet200 *parent):
-    client(new TcpClient),
+    client(nullptr),
     m_thread(new QThread),
     q_ptr(parent)
 {
-    createConnections();
+//    QEventLoop loop;
+
+//    QObject::connect(m_thread.get(),&QThread::started,&loop,&QEventLoop::quit,Qt::QueuedConnection);
+
     // запускаем поток
     m_thread->start();
-    // перемещаем объект в поток
-    client->moveToThread(m_thread.get());
+//    loop.exec();
 
     /*
     // Ошибка:
     QObject: Cannot create children for a parent that is in a different thread.
     (Parent is QTcpSocket(0x4c4aea0), parent's thread is QThread(0x4c4b1b0),
     current thread is QThread(0x93c330)
+
+    Решение: создание TcpClient в onInit
     */
 
     //[NOTE]:: Завершаем и удаляем поток в деструкторе CdeviceUsrCanet200Private?
@@ -132,11 +142,11 @@ void CdeviceUsrCanet200Private::createConnections()
         qDebug() << "Disconnected from server";
     });
 
-    QObject::connect(client, &TcpClient::dataReceived,[=](const QByteArray &data){
+    QObject::connect(client, &TcpClient::dataReceived,client,[=](const QByteArray &data){
         qDebug() <<data<<"=========";
         currentSocketData = data;
 //        emit q->sendedFromSocketData();
-    });
+        }, Qt::QueuedConnection);
 
     //QObject::connect(client, &TcpClient::connectedToServer,client,&TcpClient::read);
 
@@ -165,9 +175,21 @@ int CdeviceUsrCanet200::write(const QCanBusFrame &dataFrame)
 {
     //TODO[new]:: исправить, чтобы запускалось в отдельном потоке
     Q_D(CdeviceUsrCanet200);
-    if (d->client->sendData(parseCanFrame(dataFrame))){
-        return CDevice::SUCCESS;
+    bool isDataWritten = false;
+    bool isOk = false;
 
+    auto writeLabda = [=,&isDataWritten](){
+        if(d->client){
+            isDataWritten = d->client->sendData(parseCanFrame(dataFrame));
+        }
+    };
+
+    QMetaObject::invokeMethod(
+        QAbstractEventDispatcher::instance(d->m_thread.get()),
+        writeLabda,Qt::BlockingQueuedConnection, &isOk);
+
+    if (isDataWritten && isOk){
+        return CDevice::SUCCESS;
     }
     return CDevice::error;
 
@@ -176,9 +198,37 @@ int CdeviceUsrCanet200::write(const QCanBusFrame &dataFrame)
 int CdeviceUsrCanet200::onInit()
 {
     Q_D(CdeviceUsrCanet200);
-    d->connectionStatus = d->connectToHost(d->waitMsec);
-    if(d->connectionStatus){
-        return CDevice::SUCCESS;
+    bool res = true;
+    auto initTcp = [=](){
+        if (!d->client) {
+            d->client = new TcpClient();
+            d->createConnections();
+//            // NOTE:: удаление объекта при disconnected сигнала QTcpSocket
+//            QObject::connect(d->client,
+//                             &TcpClient::disconnectedFromServer,
+//                             d->client,
+//                             &TcpClient::deleteLater,
+//                             Qt::QueuedConnection);
+        }
+        // перемещаем объект в поток
+        //FIXME: Понять, почему бессмысленно
+//        d->client->moveToThread(d->m_thread.get());
+        d->connectionStatus = d->connectToHost(d->waitMsec);
+
+
+//        return d->connectionStatus;
+    };
+
+    QMetaObject::invokeMethod(
+        QAbstractEventDispatcher::instance(d->m_thread.get()),
+        initTcp, Qt::BlockingQueuedConnection);
+
+//    if(d->connectionStatus){
+//        return CDevice::SUCCESS;
+//    }
+    if(res){
+       return CDevice::SUCCESS;
+        qDebug() << "messss";
     }
     return CDevice::error;
 }
@@ -186,15 +236,25 @@ int CdeviceUsrCanet200::onInit()
 int CdeviceUsrCanet200::onClose()
 {
     Q_D(CdeviceUsrCanet200);
-    d->connectionStatus = false;
-    d->disconnectDevice();
+    QMetaObject::invokeMethod(
+        QAbstractEventDispatcher::instance(d->m_thread.get()),
+        [=](){
+            d->connectionStatus = false;
+            d->disconnectDevice();
+        }, Qt::BlockingQueuedConnection);
     return CDevice::SUCCESS;
 }
 
 bool CdeviceUsrCanet200::isConnected()
 {
     Q_D(CdeviceUsrCanet200);
-    return d->connectionStatus;
+    bool res;
+    QMetaObject::invokeMethod(
+        QAbstractEventDispatcher::instance(d->m_thread.get()),
+          [=](){
+            return d->connectionStatus;
+        }, Qt::BlockingQueuedConnection, &res);
+    return res;
 }
 
 void CdeviceUsrCanet200::setHostName(const QString &hostName)

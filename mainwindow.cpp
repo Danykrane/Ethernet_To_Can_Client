@@ -161,7 +161,7 @@ MainWindow::MainWindow(QWidget* parent)
 
     //--------------------------------------------------- Подключение к прибору
     connect(connectBtn, &QPushButton::clicked, [=]() {
-        if (usrCanet200->init() != CDevice::error) {
+        if (usrCanet200->hasError()) {
             hostInput->setEnabled(false);
             portInput->setEnabled(false);
             connectBtn->setVisible(false);
