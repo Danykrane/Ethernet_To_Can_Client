@@ -164,32 +164,40 @@ MainWindow::MainWindow(QWidget* parent)
 
     //--------------------------------------------------- Подключение к прибору
     connect(connectBtn, &QPushButton::clicked, [=]() {
+
+        sendBtn->setEnabled(true);
+        disconnectBtn->setVisible(true);
+
         if (!usrCanet200->isConnected()) {
             usrCanet200->connectToServer();
             hostInput->setEnabled(false);
             portInput->setEnabled(false);
             connectBtn->setVisible(false);
-            sendBtn->setEnabled(true);
-            disconnectBtn->setVisible(true);
         }
         else {
             // предупреждение
-            QMessageBox::critical(this,"Message", "Something wrong\nTry to ping", QMessageBox::Ok);
+            QMessageBox::critical(this,"Message", "Already connected\nTry to ping", QMessageBox::Ok);
+
         }
+
     });
     //--------------------------------------------------- Отключение от прибора
     connect(disconnectBtn, &QPushButton::clicked, [=]() {
+
         usrCanet200->close();
         hostInput->setEnabled(true);
         portInput->setEnabled(true);
         connectBtn->setVisible(true);
         sendBtn->setEnabled(false);
         disconnectBtn->setVisible(false);
+
     });
 
     //--------------------------------------------------- Отправление сообщения
 
     connect(sendBtn, &QPushButton::clicked, [=]() {
+
+
         QCanBusFrame frame;
         frame.setFrameId(canIdSpinBx->value());
         QByteArray data;
@@ -199,8 +207,8 @@ MainWindow::MainWindow(QWidget* parent)
             }
         }
         frame.setPayload(data);
-
         usrCanet200->write(frame);
+
     });
 
     connect(clearFormBtn, &QPushButton::clicked, [=]() { recievedData->clear(); });

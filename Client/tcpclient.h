@@ -12,7 +12,7 @@ public:
 
 public:
     bool connectToServer(const QString& hostName, uint16_t port, uint16_t waitMsec);
-    void disconnectFromServer();
+    bool disconnectFromServer(uint16_t waitMsec);
 
 public slots:
     void read();
@@ -24,7 +24,7 @@ signals:
     void dataReceived(const QByteArray& data);
 
 private:
-    QTcpSocket* socket;
+    QTcpSocket* m_socket;
 };
 
 #endif // TCPCLIENT_H

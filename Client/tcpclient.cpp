@@ -5,41 +5,46 @@
 TcpClient::TcpClient(QObject* parent)
     : QObject(parent)
 {
-    socket = new QTcpSocket(this);
+    m_socket = new QTcpSocket(this);
 
     connect(
-        socket, &QTcpSocket::connected, this, &TcpClient::connectedToServer);
+        m_socket, &QTcpSocket::connected, this, &TcpClient::connectedToServer);
 
-    connect(socket,
+    connect(m_socket,
             &QTcpSocket::disconnected,
             this,
             &TcpClient::disconnectedFromServer);
 
-    connect(socket, &QTcpSocket::readyRead, this, &TcpClient::read);
+    connect(m_socket, &QTcpSocket::readyRead, this, &TcpClient::read);
 }
 
 
 bool TcpClient::connectToServer(const QString& hostName, uint16_t port, uint16_t waitMsec)
 {
-    socket->connectToHost(hostName, port);
-    return socket->waitForConnected(waitMsec);
+    m_socket->connectToHost(hostName, port);
+    return m_socket->waitForConnected(waitMsec);
 }
 
-void TcpClient::disconnectFromServer()
+bool TcpClient::disconnectFromServer(uint16_t waitMsec)
 {
-    socket->disconnectFromHost();
+    m_socket->disconnectFromHost();
+    bool res = m_socket->state() == QAbstractSocket::UnconnectedState
+                   || m_socket->waitForDisconnected(waitMsec);
+
+    return res;
 }
 
 bool TcpClient::sendData(const QByteArray& data)
 {
-    socket->write(data);
-    socket->flush();
-    return socket->waitForBytesWritten();
+    m_socket->write(data);
+    m_socket->flush();
+    return m_socket->waitForBytesWritten();
 
 }
 
+
 void TcpClient::read()
 {
-    QByteArray data = socket->readAll();
+    QByteArray data = m_socket->readAll();
     emit       dataReceived(data);
 }

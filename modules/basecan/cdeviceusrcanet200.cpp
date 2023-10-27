@@ -52,7 +52,7 @@ public:
     /*!
      * \brief disconnectDevice - отключение устройства
      */
-    void disconnectDevice();
+    bool disconnectDevice();
 
     /*!
      * \brief parseAdress - Парсинг адреса на ip и порт
@@ -97,9 +97,9 @@ bool CdeviceUsrCanet200Private::connectToHost(uint16_t waitMsec)
     return client->connectToServer(hostName, port, waitMsec);
 }
 
-void CdeviceUsrCanet200Private::disconnectDevice()
+bool CdeviceUsrCanet200Private::disconnectDevice()
 {
-    client->disconnectFromServer();
+    return client->disconnectFromServer(waitMsec);
 }
 
 void CdeviceUsrCanet200Private::parseAdress(const std::string &adress)
@@ -131,8 +131,8 @@ void CdeviceUsrCanet200Private::createConnections()
         }, Qt::QueuedConnection);
 
     QObject::connect(client, &TcpClient::dataReceived,client,[=](const QByteArray &data){
-        qDebug() <<data<<"=========";
-        currentSocketData = data;
+        currentSocketData += data;
+        qDebug() <<currentSocketData<<"=========";
 //        emit q->sendedFromSocketData();
         }, Qt::QueuedConnection);
 }
@@ -189,9 +189,10 @@ int CdeviceUsrCanet200::onInit()
 //            // NOTE:: удаление объекта при disconnected сигнала QTcpSocket
 //            QObject::connect(d->client,
 //                             &TcpClient::disconnectedFromServer,
-//                             d->client,
-//                             &TcpClient::deleteLater,
-//                             Qt::QueuedConnection);
+//                d->client,[=](){
+//                    d->client = nullptr;
+//                    d->client->deleteLater();
+//                },Qt::QueuedConnection);
         }
         // перемещаем объект в поток
         //FIXME: Понять, почему бессмысленно
@@ -214,17 +215,20 @@ int CdeviceUsrCanet200::onInit()
 int CdeviceUsrCanet200::onClose()
 {
     Q_D(CdeviceUsrCanet200);
-
-    auto close = [=](){
+    bool isOk = false;
+    auto close = [=]() -> bool{
         d->connectionStatus = false;
-        d->disconnectDevice();
+        return d->disconnectDevice();
     };
 
     QMetaObject::invokeMethod(
         QAbstractEventDispatcher::instance(d->m_thread.get()),
-        close, Qt::BlockingQueuedConnection);
+        close, Qt::BlockingQueuedConnection, &isOk);
 
-    return CDevice::SUCCESS;
+    if(isOk){
+       return CDevice::SUCCESS;
+    }
+    return CDevice::error;
 }
 
 int CdeviceUsrCanet200::connectToServer()
@@ -232,8 +236,15 @@ int CdeviceUsrCanet200::connectToServer()
     Q_D(CdeviceUsrCanet200);
     bool isOk = false;
     auto connect = [=]() -> bool{
-        if(!d->client){
-            return false;
+        if(d->client == nullptr){
+            d->client = new TcpClient;
+            d->createConnections();
+//            QObject::connect(d->client,
+//                &TcpClient::disconnectedFromServer,
+//                d->client,[=](){
+//                    d->client = nullptr;
+//                    d->client->deleteLater();
+//                },Qt::BlockingQueuedConnection);
         }
 
         d->connectionStatus = d->connectToHost(d->waitMsec);
