@@ -193,6 +193,10 @@ int CdeviceUsrCanet200::onInit()
 //                    d->client = nullptr;
 //                    d->client->deleteLater();
 //                },Qt::QueuedConnection);
+
+            QObject::connect(d->m_thread.get(),
+                             &QThread::finished, d->client,
+                             &TcpClient::deleteLater, Qt::QueuedConnection);
         }
         // перемещаем объект в поток
         //FIXME: Понять, почему бессмысленно
