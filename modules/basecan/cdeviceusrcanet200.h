@@ -22,33 +22,41 @@ public:
     /*!
      * \brief read - реализация чтения данных
      * \param dataFrame - данные
-     * \return
+     * \return Cdevice::SUCCESS или CDevice::ERROR
      */
     int read(QByteArray& dataFrame) override;
 
     /*!
      * \brief write - реализация записи данных
      * \param dataFrame - данные
-     * \return
+     * \return Cdevice::SUCCESS или CDevice::ERROR
      */
     int write(const QCanBusFrame& dataFrame) override;
 
     /*!
      * \brief onInit - создать соединение
-     * \return true - соединение разорвано успешно, false - проблема
+     * \return Cdevice::SUCCESS или CDevice::ERROR
      */
     int onInit() override;
     /*!
      * \brief onClose - разорвать соединение
-     * \return true - соединение разорвано успешно, false - проблема
+     * \return Cdevice::SUCCESS или CDevice::ERROR
      */
     int onClose() override;
+
+
+    /*!
+     * \brief Подключиться к текущему серверу
+     * \return Cdevice::SUCCESS или CDevice::ERROR
+     */
+    int connectToServer() override;
 
     /*!
      * \brief isConnected - текущий статус соединений
      * \return true - соединение установлено, false - проблема с соединением
      */
     bool isConnected() override;
+
 
 public:
     /*!
@@ -83,10 +91,7 @@ public:
      * \brief waitMsec - Получить времня ожидания соединения
      * \return
      */
-    [[nodiscard]] const uint16_t waitMsec();
-
-//signals:
-//    void sendedFromSocketData();
+    [[nodiscard]] uint16_t waitMsec();
 
 private:
     Q_DECLARE_PRIVATE(CdeviceUsrCanet200);

@@ -19,16 +19,28 @@ public:
     /*!
      * \brief read - чтение в dataframe
      * \param dataFrame - дата формата QCanBus
-     * \return
+     * \return Cdevice::SUCCESS или CDevice::ERROR
      */
     virtual int read(QByteArray& dataFrame) = 0;
 
     /*!
      * \brief write - запись dataframe
      * \param dataFrame - дата формата QCanBus
-     * \return
+     * \return Cdevice::SUCCESS или CDevice::ERROR
      */
     virtual int write(const QCanBusFrame& dataFrame) = 0;
+
+    /*!
+     * \brief connectToServer - подключение к серверу
+     * \return Cdevice::SUCCESS или CDevice::ERROR
+     */
+    virtual int connectToServer() = 0;
+
+    /*!
+     * \brief Проверка соединения
+     * \return True - если соединение установлено
+     */
+    virtual bool isConnected() = 0;
 
 protected:
     /*!
@@ -41,11 +53,6 @@ protected:
      */
     virtual int onClose() = 0;
 
-    /*!
-     * \brief True - если соединение установлено
-     * \return
-     */
-    virtual bool isConnected() = 0;
 
 
 private:

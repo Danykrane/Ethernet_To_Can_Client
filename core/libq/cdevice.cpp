@@ -62,10 +62,11 @@ int CDevice::close()
 {
     const std::lock_guard<mutex_type> lock(m_mutex);
 
-    if (status() == disconnected)
-    {
-        return CDevice::SUCCESS;
-    }
+    //NOTE[new 27.10.2023]:: спросить про статус
+//    if (status() == disconnected)
+//    {
+//        return CDevice::SUCCESS;
+//    }
 
     resetStatus();
 
