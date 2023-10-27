@@ -4,6 +4,7 @@
 #include "cdeviceusrcanet200.h"
 
 #include <QLineEdit>
+#include <QDebug>
 #include <QLabel>
 #include <QPushButton>
 #include <QTextEdit>
@@ -159,26 +160,30 @@ MainWindow::MainWindow(QWidget* parent)
 //                recievedData->append(currentData.toHex('/'));
 //    });
 
+
+
     //--------------------------------------------------- Подключение к прибору
     connect(connectBtn, &QPushButton::clicked, [=]() {
-        if (usrCanet200->hasError()) {
+        if (!usrCanet200->isConnected()) {
+            usrCanet200->connectToServer();
             hostInput->setEnabled(false);
             portInput->setEnabled(false);
             connectBtn->setVisible(false);
+            sendBtn->setEnabled(true);
             disconnectBtn->setVisible(true);
         }
         else {
             // предупреждение
-            QMessageBox::critical(this,"Message", "Wrong ip or port \nTry to ping", QMessageBox::Ok);
+            QMessageBox::critical(this,"Message", "Something wrong\nTry to ping", QMessageBox::Ok);
         }
     });
     //--------------------------------------------------- Отключение от прибора
     connect(disconnectBtn, &QPushButton::clicked, [=]() {
         usrCanet200->close();
-
         hostInput->setEnabled(true);
         portInput->setEnabled(true);
         connectBtn->setVisible(true);
+        sendBtn->setEnabled(false);
         disconnectBtn->setVisible(false);
     });
 
@@ -200,6 +205,7 @@ MainWindow::MainWindow(QWidget* parent)
 
     connect(clearFormBtn, &QPushButton::clicked, [=]() { recievedData->clear(); });
     setCentralWidget(vertLayer->parentWidget());
+
 }
 
 MainWindow::~MainWindow()
