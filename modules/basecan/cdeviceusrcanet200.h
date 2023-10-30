@@ -20,11 +20,18 @@ public:
     explicit CdeviceUsrCanet200(const std::string& addr);
 
     /*!
-     * \brief read - реализация чтения данных
-     * \param dataFrame - данные
+     * \brief readFrame - реализация чтения данных
+     * \param dataFrame - данные формата QCanBusе
      * \return Cdevice::SUCCESS или CDevice::ERROR
      */
-    int read(QByteArray& dataFrame) override;
+    int readFrame(QCanBusFrame& dataFrame) override;
+
+    /*!
+     * \brief readAllFrames - чтение в dataFrames
+     * \param dataFrames - очередь кадров формата QCanBus
+     * \return
+     */
+    virtual int readAllFrames(QQueue<QCanBusFrame>& dataFrames) override;
 
     /*!
      * \brief write - реализация записи данных

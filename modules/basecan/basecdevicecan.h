@@ -18,10 +18,17 @@ public:
 
     /*!
      * \brief read - чтение в dataframe
-     * \param dataFrame - дата формата QCanBus
+     * \param dataFrame - кадр QCanBus
      * \return Cdevice::SUCCESS или CDevice::ERROR
      */
-    virtual int read(QByteArray& dataFrame) = 0;
+    virtual int readFrame(QCanBusFrame& dataFrame) = 0;
+
+    /*!
+     * \brief readAllFrames - чтение в dataFrames
+     * \param dataFrames - очередь кадров формата QCanBus
+     * \return
+     */
+    virtual int readAllFrames(QQueue<QCanBusFrame>& dataFrames) = 0;
 
     /*!
      * \brief write - запись dataframe

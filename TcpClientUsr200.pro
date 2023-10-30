@@ -18,7 +18,6 @@ SOURCES += \
     # sqpinBix hex widget
     modules/basecan/basecdevicecan.cpp \
     modules/basecan/cdeviceusrcanet200.cpp \
-    utils/functions.cpp \
     utils/hexspinbox.cpp \
     # main widget
     mainwindow.cpp \
