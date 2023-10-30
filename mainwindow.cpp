@@ -15,6 +15,7 @@
 #include <QGridLayout>
 
 #include <QVector>
+#include <QQueue>
 #include <QMap>
 
 #include <QFontMetrics>
@@ -61,6 +62,13 @@ MainWindow::MainWindow(QWidget* parent)
     QLabel *getDataText = new QLabel("Recieved data");
     QTextEdit*   recievedData = new QTextEdit;
     QPushButton* clearFormBtn = new QPushButton("clear");
+
+    // 2 кнопки на получение (один фрейм, все фрейы)
+    QLabel* recieveLabel = new QLabel("Select recieve factor");
+    const uint8_t colWriteBtns = 2;
+    QVector<QPushButton*> recieveBtns(colWriteBtns);
+    *(recieveBtns.begin()) = new QPushButton("single");
+    *(recieveBtns.begin() + 1) = new QPushButton("all");
 
     // --------------------------------------------------------------- Кадр Can
     QGridLayout* gridInput = new QGridLayout(new QWidget);
@@ -126,13 +134,16 @@ MainWindow::MainWindow(QWidget* parent)
     vertLayer->addWidget(sendBtn);
     vertLayer->addWidget(getDataText, 0, Qt::AlignHCenter);
     vertLayer->addWidget(recievedData);
+    vertLayer->addWidget(recieveLabel,0, Qt::AlignHCenter);
 
     QHBoxLayout* horLayer = new QHBoxLayout(new QWidget);
-    horLayer->addWidget(clearFormBtn, 0, Qt::AlignLeft);
+    horLayer->addWidget(recieveBtns[0],0 ,Qt::AlignRight);
+    horLayer->addWidget(recieveBtns[1],0, Qt::AlignLeft);
     //    horLayer->addWidget(recieveDataBtn, 0, Qt::AlignRight);
 
     vertLayer->addWidget(horLayer->parentWidget());
 
+    vertLayer->addWidget(clearFormBtn, 0, Qt::AlignLeft);
     //---------------------------------------------------- Создание устройства
 
     BaseCdeviceCan *usrCanet200 = new CdeviceUsrCanet200("192.168.10.17:20001");
@@ -167,6 +178,9 @@ MainWindow::MainWindow(QWidget* parent)
 
         sendBtn->setEnabled(true);
         disconnectBtn->setVisible(true);
+        for(const auto &btn: recieveBtns){
+            btn->setEnabled(true);
+        }
 
         if (!usrCanet200->isConnected()) {
             usrCanet200->connectToServer();
@@ -190,8 +204,30 @@ MainWindow::MainWindow(QWidget* parent)
         connectBtn->setVisible(true);
         sendBtn->setEnabled(false);
         disconnectBtn->setVisible(false);
+        for(const auto &btn: recieveBtns){
+            btn->setEnabled(false);
+        }
 
     });
+
+    //--------------------------------------------------- Одиночный прием кадра
+    connect(recieveBtns[0], &QPushButton::clicked, [=]() {
+       QCanBusFrame singleFrame;
+       usrCanet200->readFrame(singleFrame);
+
+       recievedData->append(singleFrame.toString()+'\n');
+    });
+
+    //--------------------------------------------------- Прием всех кадров
+    connect(recieveBtns[0], &QPushButton::clicked, [=]() {
+        QQueue<QCanBusFrame> multipleFrames;
+        usrCanet200->readAllFrames(multipleFrames);
+
+        while(!multipleFrames.isEmpty()){
+            recievedData->append(multipleFrames.dequeue().toString()+'\n');
+        }
+    });
+
 
     //--------------------------------------------------- Отправление сообщения
 
