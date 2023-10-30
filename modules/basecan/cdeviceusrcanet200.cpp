@@ -17,7 +17,8 @@
 const uint8_t canDataSize = 13;
 const uint8_t canPayloadSize = 8;
 const uint8_t canIdByteSize = 4;
-const uint8_t startPayloadPosion = 5;
+const uint8_t startPayloadIndex = 5;
+const uint8_t startCanIdIndex = 1;
 
 /*!
  * \brief parseCanFrameToByteArray - convert CanBusFrame в QByteArray
@@ -45,13 +46,13 @@ QByteArray parseCanFrameToByteArray(const QCanBusFrame& canFrame){
     // payload data
     for(int i = 0; i < payloadSize; ++i){
         // со смещением на 5 тк payload data начинается с 5 байта
-        resData[i + startPayloadPosion] = *(canFrame.payload().begin() + i);
+        resData[i + startPayloadIndex] = *(canFrame.payload().begin() + i);
     }
 
     // empty elements
     if(payloadSize < canPayloadSize){
         for(int i = payloadSize; i < canPayloadSize; ++i){
-            resData[i + startPayloadPosion] = 0;
+            resData[i + startPayloadIndex] = 0;
         }
     }
     return resData;
@@ -65,8 +66,52 @@ QByteArray parseCanFrameToByteArray(const QCanBusFrame& canFrame){
  */
 QQueue<QCanBusFrame> parseByteArrayToCanFrames(QByteArray &curArray, bool &isOk){
     QQueue<QCanBusFrame> resFrames;
+    isOk = true;
+    if(curArray.size() == 0){
+        isOk = false;
+        return {};
+    }
+
+    uint16_t colFullFrames = curArray.size() / canDataSize;
+    uint16_t ostArrData = curArray.size()  - colFullFrames * canDataSize;
+
+    //заполним очередь
+    for(int i = 0; i < colFullFrames; i+= canDataSize){
+        QCanBusFrame temp;
+
+        // frame id
+        QByteArray frameId;
+        // считаем 4 байта id
+        for(int ind = 0; ind < canIdByteSize; ++ind){
+            frameId.append(curArray[i + ind + startCanIdIndex]);
+        }
+        // записываем в переменную со сдвигом
+        quint32 curFrameId = 0;
+        for(int ind = 0; ind < canIdByteSize;++ind){
+            curFrameId += static_cast<uint8_t>(frameId[ind] & 0xFF) << (8 * (canIdByteSize - i - 1));
+        }
+
+        temp.setFrameId(curFrameId);
 
 
+        // payload
+        uint8_t currPayloadSize = static_cast<uint8_t>(curArray[i] & 0x0F);
+        QByteArray payload;
+        for(int ind = 0; ind < currPayloadSize; ++ind){
+            payload.append(curArray[i + ind + startPayloadIndex]);
+        }
+        temp.setPayload(payload);
+
+        // добавляем в очередь
+        resFrames << temp;
+    }
+
+    // в случае обрывистого сообщения
+    if(ostArrData > 0){
+        curArray.remove(0,colFullFrames * canDataSize);
+    }else{
+        curArray.clear();
+    }
 
     return resFrames;
 }

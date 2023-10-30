@@ -219,7 +219,7 @@ MainWindow::MainWindow(QWidget* parent)
     });
 
     //--------------------------------------------------- Прием всех кадров
-    connect(recieveBtns[0], &QPushButton::clicked, [=]() {
+    connect(recieveBtns[1], &QPushButton::clicked, [=]() {
         QQueue<QCanBusFrame> multipleFrames;
         usrCanet200->readAllFrames(multipleFrames);
 
