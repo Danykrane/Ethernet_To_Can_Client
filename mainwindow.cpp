@@ -155,24 +155,6 @@ MainWindow::MainWindow(QWidget* parent)
     connectBtn->setVisible(false);
     disconnectBtn->setVisible(true);
 
-
-//    connect(client, &TcpClient::dataReceived, [=](const QByteArray &data) {
-////        qDebug() << "Received data:" << data;
-
-////        recievedData->append(data.toHex('/'));
-//        QByteArray currentData;
-//        usrCanet200->read(currentData);
-//        recievedData->append()
-//    });
-
-//    connect(usrCanet200, &CdeviceUsrCanet200::sendedFromSocketData, [=](){
-//                QByteArray currentData;
-//                usrCanet200->read(currentData);
-//                recievedData->append(currentData.toHex('/'));
-//    });
-
-
-
     //--------------------------------------------------- Подключение к прибору
     connect(connectBtn, &QPushButton::clicked, [=]() {
 
@@ -191,7 +173,6 @@ MainWindow::MainWindow(QWidget* parent)
         else {
             // предупреждение
             QMessageBox::critical(this,"Message", "Already connected\nTry to ping", QMessageBox::Ok);
-
         }
 
     });
@@ -235,8 +216,6 @@ MainWindow::MainWindow(QWidget* parent)
     //--------------------------------------------------- Отправление сообщения
 
     connect(sendBtn, &QPushButton::clicked, [=]() {
-
-
         QCanBusFrame frame;
         frame.setFrameId(canIdSpinBx->value());
         QByteArray data;

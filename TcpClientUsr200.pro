@@ -13,7 +13,7 @@ CONFIG += c++17
 SOURCES += \
     #libq cdevice
     core/libq/cdevice.cpp\
-    core/libq/TupleAddressParser.cpp\
+    core/libq/utils/TupleAddressParser.cpp\
     # tcp client
     client/tcpclient.cpp \
     # sqpinBix hex widget
@@ -28,7 +28,7 @@ SOURCES += \
 HEADERS += \
     #libq cdevice
     core/libq/cdevice.h\
-    core/libq/TupleAddressParser.h\
+    core/libq/utils/TupleAddressParser.h\
     client/tcpclient.h \
     mainwindow.h \
     modules/basecan/basecdevicecan.h \
@@ -37,6 +37,7 @@ HEADERS += \
 
 INCLUDEPATH += $${PWD}/core/libq
 INCLUDEPATH += $${PWD}/core/client
+INCLUDEPATH += $${PWD}/core/libq/utils
 INCLUDEPATH += $${PWD}/modules/basecan
 
 # Default rules for deployment.

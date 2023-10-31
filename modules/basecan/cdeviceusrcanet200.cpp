@@ -217,44 +217,20 @@ bool CdeviceUsrCanet200Private::disconnectDevice()
 
 void CdeviceUsrCanet200Private::createConnections()
 {
-    QObject::connect(client, &TcpClient::connectedToServer,client, [] () {
-        qDebug() << "Connected to server";
-        },Qt::QueuedConnection);
+//    QObject::connect(client, &TcpClient::connectedToServer,client, [] () {
+//        qDebug() << "Connected to server";
+//        },Qt::QueuedConnection);
 
-    QObject::connect(client, &TcpClient::disconnectedFromServer,client, [] () {
-        qDebug() << "Disconnected from server";
-        }, Qt::QueuedConnection);
+//    QObject::connect(client, &TcpClient::disconnectedFromServer,client, [] () {
+//        qDebug() << "Disconnected from server";
+//        }, Qt::QueuedConnection);
 
     QObject::connect(client, &TcpClient::dataReceived,client,[=](const QByteArray &data){
         // для теста сформируем команды в формате одного QByteArray
         currentSocketData += data;
-        qDebug() <<currentSocketData<<"=========";
         bool isOk = false;
         currentAllFrames += parseByteArrayToCanFrames(currentSocketData, isOk);
-//        emit q->sendedFromSocketData();
         }, Qt::QueuedConnection);
-
-    /*
-     *
-     *  Первая партия данных
-     *
-     * "\x85\x12""4Vx\x01\x02\x03\x04\x05\x00\x00\x00\
-     *   b\x00\x00\x00\x0E\x00\x00\x00\x00\x00\x00\x00\x1B\
-     *   x85\x12""4Vx\x01\x02\x03\x04\x05\x00\x00\x00\
-     *   b\x00\x00\x00\x0E\x00\x00\x00\x00\x00\x00\x00\x1B\
-     *   x85\x12""4Vx\x01\x02\x03\x04\x05\x00\x00\x00\
-     *   x85\x12""4Vx\x01\x02\x03\x04\x05\x00\x00\x00\
-     *   x85\x12""4Vx\x01\x02\x03\x04\x05\x00\x00\x00\
-     *   x85\x12""4Vx\x01\
-     *
-     *  Вторая партия данных
-     *                      x02\x03\x04\x05\x00\x00\x00\
-     *   b\x00\x00\x00\x0E\x00\x00\x00\x00\x00\x00\x00\x1B\
-     *   x85\x12""4Vx\x01\x02\x03\x04\x05\x00\x00\x00\
-     *   b\x00\x00\x00\x0E\x00\x00\x00\x00\x00\x00\x00\x1B\
-     *   b\x00\x00\x00\x0E\x00\x00\x00\x00\x00\x00\x00\x1B\
-     *
-     */
 }
 
 
@@ -427,8 +403,6 @@ void CdeviceUsrCanet200::setHostName(const QString &hostName)
 {
     Q_D(CdeviceUsrCanet200);
     d->hostName = hostName;
-
-
 }
 
 void CdeviceUsrCanet200::setPort(uint16_t port)
