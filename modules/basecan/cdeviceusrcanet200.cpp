@@ -22,6 +22,15 @@ const uint8_t startPayloadIndex = 5;
 const uint8_t startCanIdIndex = 1;
 
 /*!
+ * \brief makeUnsigned - корректная конвертация char в uint32_t
+ * \param value - значение из QByteArray
+ * \return
+ */
+inline uint32_t makeUnsigned(char value){
+    return static_cast<uint8_t>(value);
+}
+
+/*!
  * \brief parseCanFrameToByteArray - convert CanBusFrame в QByteArray
  * \param canFrame - кадр формата Can
  * \return данные в QByteArray
@@ -59,6 +68,7 @@ QByteArray parseCanFrameToByteArray(const QCanBusFrame& canFrame){
     return resData;
 }
 
+
 /*!
  * \brief parseByteArrayToCanFrames - convert QbyteArray в очередь кдров Can
  * \param curArray - текущий QByteArray
@@ -84,12 +94,13 @@ QQueue<QCanBusFrame> parseByteArrayToCanFrames(QByteArray &curArray, bool &isOk)
         QByteArray frameId;
         // считаем 4 байта id
         for(int ind = 0; ind < canIdByteSize; ++ind){
+//            char temp = curArray[i + ind + startCanIdIndex];
             frameId.append(curArray[i + ind + startCanIdIndex]);
         }
         // записываем в переменную со сдвигом
         quint32 curFrameId = 0;
         for(int ind = 0; ind < canIdByteSize;++ind){
-            curFrameId += static_cast<uint8_t>(frameId[ind] & 0xFF) << (8 * (canIdByteSize - i - 1));
+            curFrameId |= makeUnsigned(frameId[ind]) << (8 * (canIdByteSize - ind - 1));
         }
 
         temp.setFrameId(curFrameId);

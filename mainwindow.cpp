@@ -87,7 +87,7 @@ MainWindow::MainWindow(QWidget* parent)
     HexSpinBox* canIdSpinBx = new HexSpinBox(true, this);
 
     canIdSpinBx->setMinimumWidth(lengthLabel->width() / 6);
-    canIdSpinBx->setRange(0, 2048);
+    canIdSpinBx->setRange(0, 2047);
     gridInput->addWidget(canIdLabel, 0, 1, Qt::AlignHCenter);
     gridInput->addWidget(canIdSpinBx, 1, 1);
 
@@ -252,6 +252,7 @@ MainWindow::MainWindow(QWidget* parent)
 
     connect(clearFormBtn, &QPushButton::clicked, [=]() { recievedData->clear(); });
     setCentralWidget(vertLayer->parentWidget());
+
 
 }
 
