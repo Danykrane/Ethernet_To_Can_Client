@@ -1,5 +1,6 @@
 #include "cdeviceusrcanet200.h"
 #include "client/tcpclient.h"
+#include "TupleAddressParser.h"
 
 #include <QRegularExpression>
 #include <QCanBusFrame>
@@ -162,12 +163,6 @@ public:
     bool disconnectDevice();
 
     /*!
-     * \brief parseAdress - Парсинг адреса на ip и порт
-     * \param adress - строка Ip:port
-     */
-    void parseAdress(const std::string& adress);
-
-    /*!
      * \brief Создание коннектов
      */
     void createConnections();
@@ -207,24 +202,6 @@ bool CdeviceUsrCanet200Private::connectToHost(uint16_t waitMsec)
 bool CdeviceUsrCanet200Private::disconnectDevice()
 {
     return client->disconnectFromServer(waitMsec);
-}
-
-void CdeviceUsrCanet200Private::parseAdress(const std::string &adress)
-{
-    QRegularExpression ipPattern("([0-9]{1,3}[\\.]){3}[0-9]{1,3}");
-    QRegularExpression portPattern(":(\\d+)");
-
-    QRegularExpressionMatch ipMatch = ipPattern.match(QString::fromStdString(adress));
-    QRegularExpressionMatch portMatch = portPattern.match(QString::fromStdString(adress));
-
-    if(ipMatch.hasMatch()){
-        hostName = ipMatch.captured();
-    }
-
-    if(portMatch.hasMatch()){
-        port = portMatch.captured(1).toInt();
-    }
-
 }
 
 void CdeviceUsrCanet200Private::createConnections()
@@ -276,7 +253,18 @@ CdeviceUsrCanet200::CdeviceUsrCanet200(const std::string &addr):
     d_ptr(new CdeviceUsrCanet200Private(this))
 {
     Q_D(CdeviceUsrCanet200);
-    d->parseAdress(addr);
+
+    // парсинг адреса на [имя хоста]:[порт]
+    std::string ipStr;
+    int port = 0;
+    bool parseRes = false;
+    std::tie(ipStr, port, parseRes) = tap::parse<std::string, int>(addr, ':');
+
+    if(parseRes){
+        d->hostName = QString::fromStdString(ipStr);
+        d->port = port;
+    }
+
 }
 
 int CdeviceUsrCanet200::readFrame(QCanBusFrame &dataFrame)
@@ -332,7 +320,7 @@ int CdeviceUsrCanet200::onInit()
         if (!d->client) {
             d->client = new TcpClient();
             d->createConnections();
-//            // NOTE:: удаление объекта при disconnected сигнала QTcpSocket
+            // удаление объекта при disconnected сигнала QTcpSocket
             QObject::connect(d->client,
                              &TcpClient::disconnectedFromServer,
                 d->client,[=](){
