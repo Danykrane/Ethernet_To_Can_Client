@@ -13,6 +13,7 @@ CONFIG += c++17
 SOURCES += \
     #libq cdevice
     core/libq/cdevice.cpp\
+    core/libq/TupleAddressParser.cpp\
     # tcp client
     client/tcpclient.cpp \
     # sqpinBix hex widget
@@ -27,6 +28,7 @@ SOURCES += \
 HEADERS += \
     #libq cdevice
     core/libq/cdevice.h\
+    core/libq/TupleAddressParser.h\
     client/tcpclient.h \
     mainwindow.h \
     modules/basecan/basecdevicecan.h \

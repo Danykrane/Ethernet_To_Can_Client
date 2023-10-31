@@ -222,7 +222,10 @@ MainWindow::MainWindow(QWidget* parent)
     connect(recieveBtns[1], &QPushButton::clicked, [=]() {
         QQueue<QCanBusFrame> multipleFrames;
         usrCanet200->readAllFrames(multipleFrames);
-
+        if(multipleFrames.size() == 0){
+            // предупреждение
+            QMessageBox::warning(this,"Message", "No data recieved", QMessageBox::Ok);
+        }
         while(!multipleFrames.isEmpty()){
             recievedData->append(multipleFrames.dequeue().toString()+'\n');
         }
